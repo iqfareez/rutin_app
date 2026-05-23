@@ -1,37 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import '../../../shared/database/app_database.dart';
 
 class HabitMonthlyStreakGraph extends StatelessWidget {
   const HabitMonthlyStreakGraph({
+    required this.habit,
     required this.month,
-    this.contributions,
+    this.habits = const <DateTime, bool>{},
     super.key,
   });
 
+  final HabitItem habit;
   final DateTime month;
-  final Map<DateTime, bool>? contributions;
+  final Map<DateTime, bool> habits;
   static const double _cellSize = 18;
   static const double _cellGap = 6;
-
-  static const List<String> _monthNames = <String>[
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
 
   @override
   Widget build(BuildContext context) {
     final normalizedMonth = DateTime(month.year, month.month);
     final contributionsByDay = _buildContributions();
     final days = _buildMonthGrid(normalizedMonth);
+    final createdOn = habit.createdAt ?? DateTime.now();
 
     return Card(
       elevation: 0,
@@ -40,7 +31,9 @@ class HabitMonthlyStreakGraph extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: const BorderRadius.all(Radius.circular(20)),
         side: BorderSide(
-          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.15),
+          color: Theme.of(
+            context,
+          ).colorScheme.outlineVariant.withValues(alpha: 0.15),
         ),
       ),
       child: Padding(
@@ -49,11 +42,22 @@ class HabitMonthlyStreakGraph extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${_monthNames[normalizedMonth.month - 1]} ${normalizedMonth.year}',
+              habit.title,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '#${habit.tag}  •  Created ${_formatDate(createdOn)}',
+              style: TextStyle(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.62),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 10),
@@ -80,24 +84,14 @@ class HabitMonthlyStreakGraph extends StatelessWidget {
   }
 
   Map<DateTime, bool> _buildContributions() {
-    if (contributions != null) {
-      return contributions!.map(
-        (key, value) => MapEntry(DateTime(key.year, key.month, key.day), value),
-      );
-    }
+    return habits.map(
+      (key, value) => MapEntry(DateTime(key.year, key.month, key.day), value),
+    );
+  }
 
-    final daysInMonth = DateUtils.getDaysInMonth(month.year, month.month);
-    final data = <DateTime, bool>{};
-
-    // Deterministic values for demo UI; replace with real data source later.
-    for (var day = 1; day <= daysInMonth; day++) {
-      final date = DateTime(month.year, month.month, day);
-      final score = (day * 17 + date.weekday * 11 + month.month * 7) % 100;
-
-      data[date] = score >= 55;
-    }
-
-    return data;
+  /// Format date as "d MMM", e.g. "5 Jul".
+  String _formatDate(DateTime date) {
+    return DateFormat('d MMM').format(date);
   }
 
   List<DateTime> _buildMonthGrid(DateTime m) {
@@ -139,8 +133,8 @@ class _ContributionCell extends StatelessWidget {
     final color = inMonth
         ? (isActive
               ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.onSurface.withOpacity(0.12))
-        : Theme.of(context).colorScheme.onSurface.withOpacity(0.06);
+              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12))
+        : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06);
     final message =
         '${date.year}-${date.month}-${date.day}: ${isActive ? 'completed' : 'no activity'}';
 
@@ -149,10 +143,7 @@ class _ContributionCell extends StatelessWidget {
       child: Container(
         width: size,
         height: size,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(4),
-        ),
+        decoration: BoxDecoration(color: color, borderRadius: .circular(4)),
       ),
     );
   }
