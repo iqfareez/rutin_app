@@ -105,6 +105,9 @@ class _CreateHabitPageState extends State<CreateHabitPage> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final selectedColor = _habitColors[_selectedColorIndex];
+    final selectedForegroundColor = selectedColor.computeLuminance() > 0.5
+        ? Colors.black
+        : Colors.white;
 
     return Scaffold(
       backgroundColor: scheme.surface,
@@ -123,41 +126,6 @@ class _CreateHabitPageState extends State<CreateHabitPage> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
             children: [
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(22),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      selectedColor.withOpacity(0.23),
-                      selectedColor.withOpacity(0.08),
-                    ],
-                  ),
-                  border: Border.all(color: selectedColor.withOpacity(0.28)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Build your next streak',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: scheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Pick a clear name, a tiny goal, and a color that feels motivating.',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: scheme.onSurface.withOpacity(0.7),
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               const SizedBox(height: 20),
               TextFormField(
                 controller: _titleController,
@@ -167,7 +135,9 @@ class _CreateHabitPageState extends State<CreateHabitPage> {
                   labelText: 'Title',
                   hintText: 'Morning walk',
                   filled: true,
-                  fillColor: scheme.surfaceContainerHighest.withOpacity(0.35),
+                  fillColor: scheme.surfaceContainerHighest.withValues(
+                    alpha: 0.35,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -195,7 +165,9 @@ class _CreateHabitPageState extends State<CreateHabitPage> {
                   hintText: 'Walk for 20 minutes after breakfast.',
                   alignLabelWithHint: true,
                   filled: true,
-                  fillColor: scheme.surfaceContainerHighest.withOpacity(0.35),
+                  fillColor: scheme.surfaceContainerHighest.withValues(
+                    alpha: 0.35,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -221,7 +193,9 @@ class _CreateHabitPageState extends State<CreateHabitPage> {
                   hintText: '#health',
                   prefixText: '# ',
                   filled: true,
-                  fillColor: scheme.surfaceContainerHighest.withOpacity(0.35),
+                  fillColor: scheme.surfaceContainerHighest.withValues(
+                    alpha: 0.35,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -268,7 +242,9 @@ class _CreateHabitPageState extends State<CreateHabitPage> {
               FilledButton.icon(
                 style: FilledButton.styleFrom(
                   backgroundColor: selectedColor,
-                  foregroundColor: Colors.white,
+                  foregroundColor: selectedForegroundColor,
+                  elevation: 0,
+                  shadowColor: Colors.transparent,
                   minimumSize: const Size.fromHeight(52),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -280,12 +256,12 @@ class _CreateHabitPageState extends State<CreateHabitPage> {
                 ),
                 onPressed: _isSaving ? null : _saveHabit,
                 icon: _isSaving
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 16,
                         height: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: selectedForegroundColor,
                         ),
                       )
                     : const Icon(Icons.check_rounded),
@@ -328,15 +304,6 @@ class _ColorDot extends StatelessWidget {
                 : Colors.transparent,
             width: 2,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: color.withOpacity(0.5),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
         ),
         child: isSelected
             ? const Icon(Icons.check, color: Colors.white, size: 20)

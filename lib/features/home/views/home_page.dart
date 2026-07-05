@@ -82,7 +82,10 @@ class HomePage extends StatelessWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
+        label: Text('Create Habit'),
+        tooltip: 'Create Habit',
+
         onPressed: () async {
           final created = await Navigator.of(context).push<bool>(
             MaterialPageRoute<bool>(
@@ -97,7 +100,7 @@ class HomePage extends StatelessWidget {
             );
           }
         },
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
       ),
     );
   }
